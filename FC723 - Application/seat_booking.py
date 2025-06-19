@@ -63,6 +63,36 @@ def check_seat(seat_id):
         print("Invalid input format. Use format like 12A.") 
         
 
+import random
+import string 
+
+# ----------------------------
+# Temporary Booking Reference List
+# ----------------------------
+existing_refs = [] 
+
+
+# ----------------------------
+# Generate Unique Booking Reference 
+# ----------------------------
+
+def generate_booking_reference(existing_refs):
+    """
+    
+    Generate a unique 8-character alphanumeric booking reference.    
+    Checks against a list of existing reference to ensure uniqueness.
+    
+    """
+    
+    while True:
+        # Generate a random 8- character string
+        reference = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) 
+        
+        # Checks for uniqueness
+        if reference not in existing_refs:
+            return reference
+        
+        
 # Book a seat
 def book_seat(seat_id):
     col = seat_id[-1].upper()
@@ -70,17 +100,42 @@ def book_seat(seat_id):
         row = int(seat_id[:-1]) - 1
         if col in seats and 0 <= row < 80:
             if seats[col][row] == 'F':
-                seats[col][row] = 'R'
-                print(f"Seat {seat_id} successfully booked.")
+                # Step 1: Get customer details
+                first_name = input("Enter passenger's first name:")
+                last_name = input("Enter passenger's last name:")
+                passport = input("Enter passport number:") 
+                
+                # Step 2: Generate booking reference
+                booking_ref = generate_booking_reference(existing_refs)
+                existing_refs.append(booking_ref)
+                
+                # Step 3: Store reference in the seat map
+                seats[col][row] = booking_ref 
+                
+                # Step 4: Show booking summary
+                print(f"\nSeat {seat_id} successfully booked!")
+                print("----- Booking Details ------")
+                print(f"Name      :  {first_name} {last_name}")
+                print(f"Passport   :  {passport}")
+                print(f"Seat      :  {seat_id}")
+                print(f"Reference :  {booking_ref}")
+                print("----------------------------")
+                
+                
             elif seats[col][row] in ['R', 'X', 'S']:
-                print(f"Seat {seat_id} is not available.")
+                print(f"Seat {seat_id} is not a valid bookable seat.")
             else:
-                print("Invalid seat status.")
+                print(f"Seat {seat_id} is already booked.")
         else:
                 print("Invalid seat number.") 
     except:
         print("Invalid input format.")   
         
+        
+# Test the booking reference generator
+existing_refs = ["X9YZ123A", "ABCD1234"]
+new_ref = generate_booking_reference(existing_refs)
+print(f"New booking reference: {new_ref}")
         
 # Free a booked seat
 def free_seat(seat_id):
