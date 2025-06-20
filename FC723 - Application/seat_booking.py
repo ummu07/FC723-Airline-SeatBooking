@@ -5,6 +5,7 @@ Created on Wed Jun 18 23:53:50 2025
 
 @author: ummusalmahumarrani
 """
+import sqlite3 # For intresting with the SQLite database 
 
 # FC723 Airline Seat Booking System
 # Part A: Starter version (no database yet)
@@ -97,7 +98,7 @@ def generate_booking_reference(existing_refs):
 def book_seat(seat_id):
     col = seat_id[-1].upper()
     try:
-        row = int(seat_id[:-1]) - 1
+        row = int(seat_id[:-1]) - 1 # Convert seat like "12A" to row 11, col A
         if col in seats and 0 <= row < 80:
             if seats[col][row] == 'F':
                 # Step 1: Get customer details
@@ -112,7 +113,17 @@ def book_seat(seat_id):
                 # Step 3: Store reference in the seat map
                 seats[col][row] = booking_ref 
                 
-                # Step 4: Show booking summary
+                # Step 4: Insert booking data into the database
+                conn = sqlite3.connect("/Users/ummusalmahumarrani/Desktop/FC723_Project_P480954/FC723 - Application/airline_booking.db") 
+                cursor = conn.cursor() 
+                cursor.execute('''
+                     INSERT INTO customers (booking_ref, first_name, last_name, passport, seat_row, seat_col)
+                     VALUES (?, ?, ?, ?, ?, ?)
+                ''',  (booking_ref, first_name, last_name, passport, row + 1, col))
+                conn.commit()
+                conn.close() 
+                
+                # Step 5: Display confirmation
                 print(f"\nSeat {seat_id} successfully booked!")
                 print("----- Booking Details ------")
                 print(f"Name      :  {first_name} {last_name}")
@@ -128,8 +139,8 @@ def book_seat(seat_id):
                 print(f"Seat {seat_id} is already booked.")
         else:
                 print("Invalid seat number.") 
-    except:
-        print("Invalid input format.")   
+    except Exception as e:
+        print("An error occurred during booking:", e) 
         
         
 # Test the booking reference generator
@@ -142,18 +153,41 @@ def free_seat(seat_id):
     col = seat_id[-1].upper()
     try:
         row = int(seat_id[:-1]) - 1
+        
+        
+        # Check if the seat is valid and booked
         if col in seats and 0 <= row < 80:
-            if seats[col][row] == 'R':
-                seats[col][row] = 'F'
-                print(f"Seat {seat_id} has been freed.") 
+            current_value = seats[col][row]
+            
+            
+            if current_value not in ['F', 'X', 'S']:
+                # Step 1: Set seat back to 'F'
+                seats[col][row] = 'F' 
+                
+                
+                # Step 2: Delete from database using the booking reference 
+                try:
+                    conn = sqlite3.connect("/Users/ummusalmahumarrani/Desktop/FC723_Project_P480954/FC723 - Application/airline_booking.db")
+                    cursor = conn.cursor() 
+                    
+                    
+                    # Use the booking reference stored in the seat
+                    cursor.execute("DELETE FROM customers WHERE booking_ref = ?", (current_value,))
+                    conn.commit()
+                    conn.close() 
+                    
+                    
+                    print(f"Seat {seat_id} has been successfully freed and booking removed.")
+                except Exception as db_error:
+                    print("Database error during seat release:", db_error) 
             else:
                 print(f"Seat {seat_id} is not currently booked.") 
-        else: 
-            print(f"Seat {seat_id} is not currently booked.") 
-    except:
-        print("Invalid input format.") 
-        
-        
+        else:
+            print("Invalid seat number.")
+    except Exception as e:
+        print("Input error:", e)
+    
+            
 # Show full booking status
 def show_status():
     print("\n "+" ".join([col for col in seats])) 
@@ -208,3 +242,35 @@ while True:
     elif choice == '6':
         print("Exiting program. Goodbye!")
         break
+    
+    
+# --------------------------
+# Create the SQLite database and customers table (if not exists) 
+# --------------------------
+def initialize_database():
+    """
+    Create a SQLite database file and customers table if it doesn't already exist.
+    The table stores booking reference, passenger name, passport number, and seat info.
+    """
+    # Connect to SQLite database (creats file if it doesn't exist)
+    conn = sqlite3.connect("airline_booking.db")
+    cursor = conn.cursor()
+
+
+    # Create the table with appropriate fields
+    cursor.execute('''
+                   CREATE TABLE IF NOT EXISTS customers(
+                       booking_ref TEXT PRIMARY KEY,
+                       first_name TEXT NOT NULL,
+                       last_name TEXT NOT NULL,
+                       passport TEXT NOT NULL,
+                       seat_row INTEGER NOT NULL,
+                       seat_col TEXT NOT NULL
+                    ) 
+                   ''') 
+                   
+                   
+          # Commit the chnage and close connection 
+    conn.commit()
+    conn.close()
+initialize_database() 
