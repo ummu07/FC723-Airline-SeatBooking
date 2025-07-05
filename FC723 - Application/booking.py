@@ -53,9 +53,6 @@ class BookingSystem:
             print("Invalid input format. Use format like 12A.")
 
 
-    def show_status(self):
-        pass  # To be implemented
-
     def search_booking(self, seat_id):
         pass  # To be implemented
 
@@ -190,3 +187,23 @@ class BookingSystem:
         except Exception as e:
             print("Error:", e) 
 
+
+    def show_status(self):
+        """
+        Displays the entire seat layout with booking status for each seat.
+        F = Free, X = Aisle, S = Storage, or shows Booking Reference
+        """
+        # Print header with column letters
+        print("\n   " + " ".join(self.seats.keys()))  # '   A B C D E F'
+    
+        # Loop through each row (1 to 80)
+        for i in range(80):
+            row_display = f"{i+1:02d} "  # Add row number padded to 2 digits
+            for col in self.seats:
+                seat = self.seats[col][i]
+                # Show only first letter of booking ref if booked
+                if seat not in ['F', 'X', 'S']:
+                    row_display += seat[0] + " "
+                else:
+                    row_display += seat + " "
+            print(row_display)
