@@ -53,9 +53,6 @@ class BookingSystem:
             print("Invalid input format. Use format like 12A.")
 
 
-    def search_booking(self, seat_id):
-        pass  # To be implemented
-
     def run(self):
         while True:
             self.show_menu()
@@ -207,3 +204,28 @@ class BookingSystem:
                 else:
                     row_display += seat + " "
             print(row_display)
+
+
+    def search_booking(self, seat_id):
+        """
+        Allows the user to search for a seat and view its current status.
+        Shows booking reference if the seat is booked.
+        """
+        col = seat_id[-1].upper()
+        try:
+            row = int(seat_id[:-1]) - 1
+    
+            if col in self.seats and 0 <= row < 80:
+                status = self.seats[col][row]
+    
+                if status == 'F':
+                    print(f"Seat {seat_id} is currently free.")
+                elif status in ['X', 'S']:
+                    print(f"Seat {seat_id} is not a bookable seat.")
+                else:
+                    # If not F/X/S, it's a booking reference
+                    print(f"Seat {seat_id} is booked. (Reference: {status})")
+            else:
+                print("Invalid seat number.")
+        except Exception as e:
+            print("Invalid input format. Use format like 12A.")
