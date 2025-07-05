@@ -6,6 +6,14 @@ Created on Thu Jun 19 23:59:53 2025
 @author: ummusalmahumarrani
 """
 
+import os
+
+# Delete existing DB if it exists
+if os.path.exists("airline_booking.db"):
+    os.remove("airline_booking.db")
+    print("Old database removed. A new one will be created.")
+
+
 import sqlite3
 import os
 

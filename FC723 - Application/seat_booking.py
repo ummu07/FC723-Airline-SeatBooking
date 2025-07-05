@@ -20,6 +20,8 @@ import sqlite3 # For intresting with the SQLite database
 seats = {} 
 
 
+# Check that the seat alyout matches the project brief. CUrrently the rows do not
+# match the ailse layout of the plane. CB
 # Initialize seats with 'F', but insert 'X' and 'S' for specific columns/rows 
 for col in ['A', 'B', 'C', 'D', 'E', 'F' ]:
     seats[col] = [] 
@@ -38,7 +40,12 @@ for col in ['A', 'B', 'C', 'D', 'E', 'F' ]:
         else:
             seats[col].append('F') 
             
-            
+# You should make a class with all of the functions associated to your menu as the
+# methods of that class. Then you can instantiate the seat alyout as part of the attributes. CB
+
+# You may also want to make use of user-defined modules. So the 'main' python file can contain
+# the logic for running the program, while importing the functionality of the program
+# from another file. Creating the database can also be performed by another module. CB
 # Display main menu 
 def show_menu():
     print("\n===== Apache Airline Seat Booking =====")
@@ -142,7 +149,9 @@ def book_seat(seat_id):
     except Exception as e:
         print("An error occurred during booking:", e) 
         
-        
+# You have a lsit of existing references here, but you have a database to store this information
+# isntead. Which do you use? CB
+
 # Test the booking reference generator
 existing_refs = ["X9YZ123A", "ABCD1234"]
 new_ref = generate_booking_reference(existing_refs)
@@ -205,14 +214,13 @@ def search_booking(seat_id):
         row = int(seat_id[:-1]) - 1
         if col in seats and 0 <= row < 80:
             status = seats[col][row]
-            if status == 'R':
-                print(f"Seat {seat_id} is booked. (Reserved by Passenger)") 
-            elif status == 'F':
+            if status == 'F':
                 print(f"Seat {seat_id} is currently free.") 
-            elif status in ['X', 'S']:
-                print(f"Seat {seat_id} is not a bookable seat.")
+            elif status == ['X', 'S']:
+                print(f"Seat {seat_id} is not a bookable seat.") 
             else:
-                print("Unknown seat status.")
+                # Any string other than F/X/S is a booking reference
+                print(f"Seat {seat_id} is booked. (Reference: {status})")
         else:
             print("Invalid seat number.") 
     except:
@@ -243,6 +251,9 @@ while True:
         print("Exiting program. Goodbye!")
         break
     
+
+# Again here, the database initialisation can be kept in a different file and instantiated
+# when you create the booking system in you main py file. CB 
     
 # --------------------------
 # Create the SQLite database and customers table (if not exists) 
